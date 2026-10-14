@@ -1,0 +1,33 @@
+:root {
+  --bg: #f4f6f8; --card: #fff; --text: #1d2430; --muted: #6b7480; --line: #e3e7ec;
+  --brand: #1f6feb; --ok: #2e8b57; --warn: #c98200; --bad: #c8382d;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--text); background: var(--bg);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+.app { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
+header { padding: 20px 0 8px; }
+header h1 { margin: 0; font-size: 24px; }
+header p { margin: 4px 0 0; color: var(--muted); }
+nav { display: flex; gap: 8px; margin: 12px 0; }
+nav button { flex: 1; padding: 10px; border: 1px solid var(--line); background: var(--card); border-radius: 8px; font-size: 15px; }
+nav button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+.card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.card h2 { font-size: 17px; margin: 0 0 8px; }
+.hint, .src, .disclaimer { color: var(--muted); font-size: 13px; }
+button { font-size: 15px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: #fff; }
+button.primary { width: 100%; padding: 14px; background: var(--brand); color: #fff; border: none; font-size: 17px; }
+button:disabled { opacity: .5; }
+button.link { border: none; background: none; color: var(--brand); padding: 8px 0; display: block; }
+.bubble { background: #eef4ff; padding: 10px 12px; border-radius: 10px; }
+.row { display: flex; align-items: baseline; gap: 8px; }
+.row > :first-child { flex: 1; }
+.row em { font-style: normal; font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #eef1f4; }
+.ind, .policy { padding: 10px 0; border-top: 1px solid var(--line); }
+.ind p, .policy p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.lv-预警 em { background: #fde8e6; color: var(--bad); }
+.lv-关注 em { background: #fff3dc; color: var(--warn); }
+.lv-正常 em { background: #e5f4ec; color: var(--ok); }
+textarea { width: 100%; font-size: 15px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; }
+.err { background: #fde8e6; color: var(--bad); padding: 10px; border-radius: 8px; margin-bottom: 12px; }

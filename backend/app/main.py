@@ -1,0 +1,48 @@
+from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from . import llm
+from .modules import diagnosis, intake, policy
+from .schemas import BusinessData, Diagnosis
+
+app = FastAPI(title="小企有数 API")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+
+@app.get("/api/health")
+def health():
+    return {"ok": True, "llm": llm.enabled(), "model": llm.TEXT_MODEL if llm.enabled() else None}
+
+
+# ----- A：录入 -----
+@app.post("/api/intake/extract")
+async def extract(file: UploadFile = File(...)):
+    txs = intake.extract_transactions(await file.read(), file.content_type or "image/jpeg")
+    return {"transactions": [t.model_dump(mode="json") for t in txs], "llm": llm.enabled()}
+
+
+@app.post("/api/intake/next-question")
+def next_question(data: BusinessData):
+    return {"next": intake.next_question(data)}
+
+
+# ----- C：政策 -----
+@app.post("/api/policy/match")
+def policy_match(data: BusinessData):
+    return [m.model_dump(mode="json") for m in policy.match(data)]
+
+
+class Question(BaseModel):
+    question: str
+
+
+@app.post("/api/policy/ask")
+def policy_ask(q: Question):
+    return policy.ask(q.question)
+
+
+# ----- B：诊断（串起全流程） -----
+@app.post("/api/diagnose", response_model=Diagnosis)
+def diagnose(data: BusinessData):
+    return diagnosis.diagnose(data, policy.match(data))

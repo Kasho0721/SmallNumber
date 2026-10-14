@@ -389,3 +389,4 @@ main { padding-top: 20px; }
 .more p { margin-top: 6px; font-size: 15px; color: var(--muted); }
 .tel { justify-content: center; padding: 4px 4px 10px; }
 .fine.center { text-align: center; margin: -8px 0 12px; }
+.crash { white-space: pre-wrap; word-break: break-all; font-size: 12px; background: var(--card); border-radius: 10px; padding: 12px; margin: 12px 0; max-height: 50vh; overflow: auto; }

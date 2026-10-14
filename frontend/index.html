@@ -9,6 +9,13 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // 脚本还没跑起来就报错时（比如浏览器太旧），把原因显示出来，避免白屏
+      addEventListener('error', function (e) {
+        var root = document.getElementById('root')
+        if (root && !root.children.length) root.innerHTML = '<pre style="white-space:pre-wrap;padding:24px;font-size:14px">页面没能打开：' + String(e.message || e.error) + '</pre>'
+      })
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

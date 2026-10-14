@@ -4,7 +4,7 @@ import type { PolicyGuide } from './types'
 
 const money = (v: number) => v.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-export function PolicyGuideView({ guide, onBack }: { guide: PolicyGuide; onBack: () => void }) {
+export function PolicyGuideView({ guide, onBack, backLabel }: { guide: PolicyGuide; onBack: () => void; backLabel: string }) {
   // 每一步有确认问题时，勾选后才展开下一步，引导老板一步步走完
   const [done, setDone] = useState<boolean[]>(guide.steps.map(() => false))
   const firstOpen = done.findIndex((d, i) => !d && guide.steps[i].check)
@@ -14,7 +14,7 @@ export function PolicyGuideView({ guide, onBack }: { guide: PolicyGuide; onBack:
 
   return (
     <section>
-      <button className="back" onClick={onBack}><IconBack />返回体检报告</button>
+      <button className="back" onClick={onBack}><IconBack />{backLabel}</button>
       <div className="card">
         <h2 style={{ fontSize: 21 }}>{guide.title}</h2>
         <p className="where"><IconPin /><span>在哪办：{guide.where}</span></p>

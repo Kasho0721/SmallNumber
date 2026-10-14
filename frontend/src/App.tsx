@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from './api'
+import { reportQuestions } from './ask'
 import sample from './sample.json'
 import { PolicyGuideView } from './PolicyGuide'
 import { Report } from './Report'
-import { IconAlert, IconBook, IconCamera, IconChat, IconHelp, IconList, IconPulse } from './icons'
-import type { BusinessData, Diagnosis, PolicyGuide } from './types'
+import { IconAlert, IconArrow, IconBook, IconCamera, IconChat, IconGift, IconHelp, IconList, IconPulse } from './icons'
+import type { AskTurn, BusinessData, Diagnosis, PolicyGuide } from './types'
 
 type View = 'intake' | 'report' | 'ask'
 export type Run = <T>(fn: () => Promise<T>) => Promise<T | undefined>
@@ -30,7 +31,10 @@ export default function App() {
   const [report, setReport] = useState<Diagnosis | null>(null)
   const [busy, setBusy] = useState('')
   const [msg, setMsg] = useState('')
-  const [guide, setGuide] = useState<PolicyGuide | null>(null)
+  // 引导填写可以从报告或问政策进入，记下从哪来，返回时回到原处
+  const [guide, setGuide] = useState<{ g: PolicyGuide; from: View } | null>(null)
+  const [turns, setTurns] = useState<AskTurn[]>([])
+  const [useShop, setUseShop] = useState(true)
 
   // label 是加载时显示的文字
   const withLabel = (label: string): Run => async fn => {
@@ -39,6 +43,19 @@ export default function App() {
   }
 
   function go(v: View) { setView(v); setGuide(null); window.scrollTo(0, 0) }
+
+  async function openGuide(id: string, from: View) {
+    const g = await withLabel('正在生成办理步骤…')(() => api.guide(id, data))
+    if (g) { setGuide({ g, from }); window.scrollTo(0, 0) }
+  }
+
+  // 报告里任何一处点“问问”，都带着问题跳到问政策，并把这家店的数据一起发给后端
+  async function ask(question: string, policyId?: string) {
+    const withShop = !!report && useShop
+    setView('ask'); setGuide(null)
+    const r = await withLabel('正在结合你的数据查政策…')(() => api.ask(question, withShop ? data : undefined, policyId))
+    if (r) setTurns(t => [...t, { question, withShop, result: r }])
+  }
 
   return (
     <div className="app">
@@ -53,20 +70,26 @@ export default function App() {
       {msg && <div className="err"><IconAlert />出了点问题：{msg}</div>}
 
       <main>
-        {view === 'intake' && (
-          <Intake data={data} setData={setData} busy={!!busy} withLabel={withLabel}
-            onDiagnose={async () => {
-              const r = await withLabel('正在体检，请稍等…')(() => api.diagnose(data))
-              if (r) { setReport(r); setGuide(null); go('report') }
-            }} />
-        )}
-        {view === 'report' && (guide
-          ? <PolicyGuideView guide={guide} onBack={() => { setGuide(null); window.scrollTo(0, 0) }} />
-          : <Report report={report} busy={!!busy} onStart={() => go('intake')} onGuide={async id => {
-              const g = await withLabel('正在生成办理步骤…')(() => api.guide(id, data))
-              if (g) { setGuide(g); window.scrollTo(0, 0) }
-            }} />)}
-        {view === 'ask' && <Ask run={withLabel('正在查政策…')} busy={!!busy} />}
+        {guide ? (
+          <PolicyGuideView guide={guide.g} backLabel={guide.from === 'ask' ? '返回问政策' : '返回体检报告'}
+            onBack={() => { setGuide(null); window.scrollTo(0, 0) }} />
+        ) : <>
+          {view === 'intake' && (
+            <Intake data={data} setData={setData} busy={!!busy} withLabel={withLabel}
+              onDiagnose={async () => {
+                const r = await withLabel('正在体检，请稍等…')(() => api.diagnose(data))
+                if (r) { setReport(r); go('report') }
+              }} />
+          )}
+          {view === 'report' && (
+            <Report report={report} busy={!!busy} onStart={() => go('intake')} onAsk={ask}
+              onGuide={id => openGuide(id, 'report')} />
+          )}
+          {view === 'ask' && (
+            <Ask data={data} report={report} turns={turns} busy={!!busy} useShop={useShop} setUseShop={setUseShop}
+              onAsk={ask} onGuide={id => openGuide(id, 'ask')} go={go} />
+          )}
+        </>}
       </main>
 
       <nav className="tabbar">
@@ -166,40 +189,101 @@ function wan(v: number) {
   return v >= 10000 ? `${(v / 10000).toFixed(1)}万` : v.toLocaleString()
 }
 
-const suggestions = [
-  '我是个体户，一个月卖 8 万要交增值税吗？',
-  '小规模纳税人城建税怎么交？',
-  '个体户经营所得有什么减半优惠？',
-]
+function Ask({ data, report, turns, busy, useShop, setUseShop, onAsk, onGuide, go }: {
+  data: BusinessData; report: Diagnosis | null; turns: AskTurn[]; busy: boolean
+  useShop: boolean; setUseShop: (v: boolean) => void
+  onAsk: (q: string, policyId?: string) => void; onGuide: (id: string) => void; go: (v: View) => void
+}) {
+  const [q, setQ] = useState('')
+  const last = useRef<HTMLDivElement>(null)
+  // 有新回答时滚到它
+  useEffect(() => { last.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }, [turns.length])
 
-function Ask({ run, busy }: { run: Run; busy: boolean }) {
-  const [q, setQ] = useState(suggestions[0])
-  const [a, setA] = useState<Awaited<ReturnType<typeof api.ask>> | null>(null)
+  const asked = new Set(turns.map(t => t.question))
+  const suggests = reportQuestions(useShop ? report : null).filter(s => !asked.has(s.q))
+  const p = data.profile
+  const flagged = report?.indicators.filter(i => i.level === '关注' || i.level === '预警').length ?? 0
+
   return (
     <section>
       <h2 className="page-title">问政策</h2>
       <p className="page-sub">用大白话问就行，回答都会标出依据的文件。</p>
-      <div className="card">
-        <textarea value={q} onChange={e => setQ(e.target.value)} rows={3} placeholder="想问什么？" />
-        <div className="suggests">
-          {suggestions.map(s => <button key={s} onClick={() => setQ(s)}>{s}</button>)}
+
+      {report ? (
+        <div className={`card ctx${useShop ? '' : ' off'}`}>
+          <div className="ctx-head">
+            <IconPulse />
+            <div>
+              <b>{useShop ? `已结合「${p.name ?? '你的店'}」的体检数据` : '现在只按政策原文回答'}</b>
+              <div className="ctx-chips">
+                <span className="chip brand">{p.entity_type}</span>
+                {p.taxpayer_type !== '不清楚' && <span className="chip brand">{p.taxpayer_type}</span>}
+                {flagged > 0 && <span className="chip warn">{flagged} 项需留意</span>}
+              </div>
+            </div>
+          </div>
+          <label className="toggle">
+            <input type="checkbox" checked={useShop} onChange={e => setUseShop(e.target.checked)} />
+            回答时结合我的数据
+          </label>
+          <button className="ask-link" onClick={() => go('report')}>回到体检报告<IconArrow /></button>
         </div>
-        <button className="btn btn-primary" disabled={busy || !q.trim()}
-          onClick={async () => setA((await run(() => api.ask(q))) ?? null)}>
-          <IconChat />提问
-        </button>
-      </div>
-      {a && (
-        <div className="card">
-          <div className="bubble-row" style={{ marginTop: 0 }}>
-            <div className="avatar">数</div>
-            <div style={{ flex: 1 }}>
-              <p className="answer">{a.answer}</p>
-              <p className="src">依据：{a.sources.map(s => s.source_name).filter((v, i, arr) => arr.indexOf(v) === i).join('；')}</p>
+      ) : (
+        <div className="card ctx off">
+          <p className="hint">先做一次体检，回答就能结合你店里的收入、身份和体检结果。</p>
+          <button className="ask-link" onClick={() => go('intake')}>去记账体检<IconArrow /></button>
+        </div>
+      )}
+
+      {turns.map((t, k) => (
+        <div key={k} ref={k === turns.length - 1 ? last : undefined} className="turn">
+          <p className="q-bubble">{t.question}</p>
+          <div className="card">
+            <div className="bubble-row" style={{ marginTop: 0 }}>
+              <div className="avatar">数</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p className="answer">{t.result.answer}</p>
+                {t.withShop && t.result.shop_facts.length > 0 && (
+                  <div className="ctx-chips used">
+                    <span>结合了：</span>
+                    {t.result.shop_facts.map(f => <span key={f} className="chip">{f}</span>)}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="srcs">
+              <p className="srcs-title">依据的文件</p>
+              {t.result.sources.map(s => (
+                <div key={s.id} className="src-row">
+                  <div>
+                    {s.source_url
+                      ? <a href={s.source_url} target="_blank" rel="noreferrer">{s.source_name}</a>
+                      : <span>{s.source_name}</span>}
+                    <small>{s.title}</small>
+                  </div>
+                  {s.has_guide && (
+                    <button className="btn btn-soft" disabled={busy} onClick={() => onGuide(s.id)}><IconGift />怎么办理</button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      ))}
+
+      <div className="card">
+        <textarea value={q} onChange={e => setQ(e.target.value)} rows={3}
+          placeholder={turns.length ? '还想问什么？' : '想问什么？比如：我要交增值税吗？'} />
+        {suggests.length > 0 && (
+          <div className="suggests">
+            {suggests.map(s => <button key={s.q} disabled={busy} onClick={() => onAsk(s.q, s.policyId)}>{s.q}</button>)}
+          </div>
+        )}
+        <button className="btn btn-primary" disabled={busy || !q.trim()}
+          onClick={() => { onAsk(q.trim()); setQ('') }}>
+          <IconChat />提问
+        </button>
+      </div>
     </section>
   )
 }

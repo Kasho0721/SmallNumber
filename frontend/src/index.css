@@ -150,7 +150,7 @@ h1, h2, h3, p { margin: 0; }
 .ind {
   background: var(--card); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
   border-top: 4px solid var(--line); text-align: left; border-left: none; border-right: none; border-bottom: none;
-  display: flex; flex-direction: column; gap: 4px; min-height: 120px;
+  display: flex; flex-direction: column; gap: 4px; min-height: 120px; cursor: pointer;
 }
 .ind.lv-正常 { border-top-color: var(--ok); }
 .ind.lv-关注 { border-top-color: var(--warn); }
@@ -164,9 +164,10 @@ h1, h2, h3, p { margin: 0; }
 .tap-hint { font-size: 13px; color: var(--muted); }
 
 /* 风险提示 */
+.risk > div { flex: 1; }
 .risk { display: flex; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 16px; }
 .risk:first-of-type { border-top: none; padding-top: 0; }
-.risk svg { width: 22px; height: 22px; color: var(--warn); flex: none; margin-top: 2px; }
+.risk > svg { width: 22px; height: 22px; color: var(--warn); flex: none; margin-top: 2px; }
 
 /* 政策卡 */
 .policy { padding: 16px 0; border-top: 1px solid var(--line); }
@@ -195,6 +196,43 @@ textarea:focus { outline: none; border-color: var(--brand); background: #fff; }
   padding: 8px 14px; font-size: 15px; color: var(--text); min-height: 40px; text-align: left;
 }
 .answer { white-space: pre-wrap; font-size: 17px; line-height: 1.75; }
+
+/* 报告和问政策之间的“问问”入口 */
+.ask-link {
+  display: inline-flex; align-items: center; gap: 4px; border: none; background: none; padding: 8px 0 0;
+  min-height: 40px; color: var(--brand); font-size: 16px; font-weight: 600; text-align: left;
+}
+.ask-link svg { width: 18px; height: 18px; flex: none; }
+.ind-exp .ask-link { display: flex; }
+.policy-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.policy .policy-actions .btn { margin-top: 0; padding: 10px 12px; }
+
+/* 问政策：店铺上下文 */
+.ctx { border-left: 4px solid var(--brand); }
+.ctx.off { border-left-color: var(--line); }
+.ctx-head { display: flex; gap: 12px; align-items: flex-start; }
+.ctx-head > svg { width: 26px; height: 26px; color: var(--brand); flex: none; margin-top: 2px; }
+.ctx.off .ctx-head > svg { color: var(--muted); }
+.ctx-head b { font-size: 17px; }
+.ctx-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.ctx-chips.used { margin-top: 12px; align-items: center; font-size: 14px; color: var(--muted); }
+.toggle { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 16px; cursor: pointer; min-height: 44px; }
+.toggle input { width: 22px; height: 22px; accent-color: var(--brand); flex: none; }
+
+/* 问政策：对话 */
+.turn { scroll-margin-top: 12px; }
+.q-bubble {
+  margin: 4px 0 10px auto; max-width: 85%; width: fit-content; background: var(--brand); color: #fff;
+  padding: 10px 14px; border-radius: 10px 4px 10px 10px; font-size: 17px;
+}
+.srcs { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.srcs-title { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.src-row { display: flex; gap: 10px; align-items: center; padding: 8px 0; font-size: 15px; }
+.src-row > div { flex: 1; min-width: 0; }
+.src-row a { color: var(--brand-deep); }
+.src-row small { display: block; color: var(--muted); font-size: 13px; }
+.src-row .btn { width: auto; min-height: 44px; font-size: 15px; padding: 8px 12px; flex: none; }
+.src-row .btn svg { width: 18px; height: 18px; }
 
 /* 引导填写 */
 .progress { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin-top: 14px; }

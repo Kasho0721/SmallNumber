@@ -1,15 +1,9 @@
 import { useState } from 'react'
-import { IconAlert, IconArrow, IconGift, IconPulse } from './icons'
+import { formatValue, indicatorQuestion, policyQuestion, reportQuestions, riskQuestion } from './ask'
+import { IconAlert, IconArrow, IconChat, IconGift, IconPulse } from './icons'
 import type { Diagnosis, Indicator } from './types'
 
-const pct = new Set(['profit_margin', 'gross_margin', 'tax_burden', 'expense_no_invoice', 'debt_pressure'])
 const chipClass: Record<Indicator['level'], string> = { 正常: 'ok', 关注: 'warn', 预警: 'bad', 数据不足: '' }
-
-function formatValue(i: Indicator): [string, string] {
-  if (i.value == null) return ['—', '']
-  if (pct.has(i.key)) return [(i.value * 100).toFixed(1), '%']
-  return [i.value < 10 ? i.value.toFixed(1) : Math.round(i.value).toLocaleString(), i.unit]
-}
 
 // 健康分只在前端由指标等级折算，便于一眼看懂；后端没有这个字段
 function healthScore(inds: Indicator[]) {
@@ -36,8 +30,17 @@ function Ring({ score }: { score: number | null }) {
   )
 }
 
-export function Report({ report, busy, onGuide, onStart }: {
+function AskLink({ onClick, disabled, children = '问问相关政策' }: { onClick: () => void; disabled: boolean; children?: string }) {
+  return (
+    <button className="ask-link" disabled={disabled} onClick={e => { e.stopPropagation(); onClick() }}>
+      <IconChat />{children}<IconArrow />
+    </button>
+  )
+}
+
+export function Report({ report, busy, onGuide, onStart, onAsk }: {
   report: Diagnosis | null; busy: boolean; onGuide: (policyId: string) => void; onStart: () => void
+  onAsk: (question: string, policyId?: string) => void
 }) {
   const [open, setOpen] = useState<string | null>(null)
 
@@ -76,7 +79,15 @@ export function Report({ report, busy, onGuide, onStart }: {
       {report.risks.length > 0 && (
         <div className="card">
           <h2><span className="card-icon" style={{ color: 'var(--warn)' }}><IconAlert /></span>值得留意</h2>
-          {report.risks.map((r, k) => <div key={k} className="risk"><IconAlert /><span>{r}</span></div>)}
+          {report.risks.map((r, k) => (
+            <div key={k} className="risk">
+              <IconAlert />
+              <div>
+                <span>{r}</span>
+                <AskLink disabled={busy} onClick={() => onAsk(riskQuestion(r))}>和交税有关吗？问问</AskLink>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -85,14 +96,22 @@ export function Report({ report, busy, onGuide, onStart }: {
         {report.indicators.map(i => {
           const [v, unit] = formatValue(i)
           const isOpen = open === i.key
+          const q = indicatorQuestion(i)
+          const toggle = () => setOpen(isOpen ? null : i.key)
           return (
-            <button key={i.key} className={`ind lv-${i.level}${isOpen ? ' open' : ''}`}
-              onClick={() => setOpen(isOpen ? null : i.key)} aria-expanded={isOpen}>
+            <div key={i.key} role="button" tabIndex={0} className={`ind lv-${i.level}${isOpen ? ' open' : ''}`}
+              onClick={toggle} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), toggle())}
+              aria-expanded={isOpen}>
               <span className="ind-name">{i.name}</span>
               <span className="ind-val">{v}{unit && <small>{unit}</small>}</span>
               <span className={`chip ${chipClass[i.level]}`}>{i.level}</span>
-              {isOpen && <span className="ind-exp">{i.explanation}</span>}
-            </button>
+              {isOpen && (
+                <span className="ind-exp">
+                  {i.explanation}
+                  {q && <AskLink disabled={busy} onClick={() => onAsk(q)} />}
+                </span>
+              )}
+            </div>
           )
         })}
       </div>
@@ -110,11 +129,26 @@ export function Report({ report, busy, onGuide, onStart }: {
             </div>
             <p>{m.reason}</p>
             <p className="src">依据：{m.policy.source_name}</p>
-            <button className="btn btn-soft" disabled={busy} onClick={() => onGuide(m.policy.id)}>
-              <IconGift />怎么办理、怎么填<IconArrow />
-            </button>
+            <div className="policy-actions">
+              <button className="btn btn-soft" disabled={busy} onClick={() => onGuide(m.policy.id)}>
+                <IconGift />怎么办理<IconArrow />
+              </button>
+              <button className="btn btn-ghost" disabled={busy} onClick={() => onAsk(policyQuestion(m.policy.title), m.policy.id)}>
+                <IconChat />问问这条
+              </button>
+            </div>
           </div>
         ))}
+      </div>
+
+      <div className="card">
+        <h2><span className="card-icon"><IconChat /></span>对报告有疑问？</h2>
+        <p className="hint">回答会结合你这份体检的数据，并标出依据的文件。</p>
+        <div className="suggests" style={{ marginTop: 12, marginBottom: 0 }}>
+          {reportQuestions(report).map(s => (
+            <button key={s.q} disabled={busy} onClick={() => onAsk(s.q, s.policyId)}>{s.q}</button>
+          ))}
+        </div>
       </div>
 
       <p className="disclaimer">{report.disclaimer}</p>

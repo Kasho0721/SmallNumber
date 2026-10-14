@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -35,11 +37,16 @@ def policy_match(data: BusinessData):
 
 class Question(BaseModel):
     question: str
+    data: Optional[BusinessData] = None  # 带上经营数据时，回答会结合这家店的体检结果
+    policy_id: Optional[str] = None      # 从报告里某条政策点进来时，优先检索这条
 
 
 @app.post("/api/policy/ask")
 def policy_ask(q: Question):
-    return policy.ask(q.question)
+    r = policy.ask(q.question, q.data, q.policy_id)
+    for s in r["sources"]:
+        s["has_guide"] = s["id"] in guide.GUIDES
+    return r
 
 
 @app.post("/api/policy/{policy_id}/guide", response_model=PolicyGuide)

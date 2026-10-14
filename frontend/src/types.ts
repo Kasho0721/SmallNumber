@@ -73,3 +73,8 @@ export interface PolicyGuide {
   downloads: Download[]
   caution: string
 }
+
+export interface AskSource { id: string; title: string; source_name: string; source_url?: string | null; has_guide: boolean }
+// shop_facts：后端回答时实际用到的这家店的数据要点，页面上展示“结合了什么”
+export interface AskResult { answer: string; sources: AskSource[]; shop_facts: string[] }
+export interface AskTurn { question: string; withShop: boolean; result: AskResult }

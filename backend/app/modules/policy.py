@@ -27,7 +27,7 @@ def _active(p: Policy, on: date) -> bool:
 def match(data: BusinessData) -> list[PolicyMatch]:
     prof = data.profile
     revenue = sum(t.amount for t in data.transactions if t.direction == "收入")
-    months = max(((data.period.end - data.period.start).days + 1) / 30.4, 1)
+    months = data.period.months
     monthly = revenue / months
     small = prof.taxpayer_type == "小规模纳税人"
     out: list[PolicyMatch] = []
@@ -62,6 +62,11 @@ def match(data: BusinessData) -> list[PolicyMatch]:
                 missing = ["年度应纳税所得额"]
             else:
                 reason = "适用于企业，个体工商户不缴企业所得税。"
+        elif p.id == "sh-urban-construction-tax":
+            if prof.region and "上海" in prof.region:
+                status, reason = "符合", "登记地在上海，城建税按地址适用 7%/5%/1% 税率。"
+            else:
+                reason = "仅适用于上海纳税人。"
         else:
             status, reason = "可能符合", "TODO(C)：补充匹配规则或交给 LLM 判断。"
         out.append(PolicyMatch(policy=p, status=status, reason=reason, missing_info=missing))

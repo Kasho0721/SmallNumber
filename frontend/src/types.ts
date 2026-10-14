@@ -48,7 +48,7 @@ export interface Indicator {
 }
 
 export interface PolicyMatch {
-  policy: { id: string; title: string; summary: string; source_name: string; source_url?: string | null }
+  policy: { id: string; title: string; summary: string; region: string; source_name: string; source_url?: string | null }
   status: '符合' | '可能符合' | '不符合'
   reason: string
   missing_info: string[]
@@ -60,4 +60,16 @@ export interface Diagnosis {
   risks: string[]
   policy_matches: PolicyMatch[]
   disclaimer: string
+}
+
+export interface FillField { form: string; line: string; label: string; value: number | null; note: string }
+export interface GuideStep { title: string; detail: string; check: string | null; fields: FillField[] }
+export interface Download { name: string; url: string; note: string }
+export interface PolicyGuide {
+  policy_id: string
+  title: string
+  where: string
+  steps: GuideStep[]
+  downloads: Download[]
+  caution: string
 }

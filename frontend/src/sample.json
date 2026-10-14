@@ -3,28 +3,126 @@
     "name": "张姐早餐店（示例）",
     "entity_type": "个体工商户",
     "industry": "餐饮",
-    "region": "湖北省武汉市",
+    "region": "上海市普陀区",
     "taxpayer_type": "小规模纳税人",
     "collection_method": "查账征收",
     "employees": 3,
     "total_assets": 80000
   },
-  "period": { "start": "2026-07-01", "end": "2026-09-30" },
+  "period": {
+    "start": "2026-07-01",
+    "end": "2026-09-30"
+  },
   "transactions": [
-    { "date": "2026-07-31", "direction": "收入", "amount": 62000, "category": "销售", "has_invoice": false, "source": "导入", "note": "7月微信+支付宝收款汇总" },
-    { "date": "2026-08-31", "direction": "收入", "amount": 58500, "category": "销售", "has_invoice": false, "source": "导入", "note": "8月收款汇总" },
-    { "date": "2026-09-30", "direction": "收入", "amount": 66800, "category": "销售", "has_invoice": false, "source": "导入", "note": "9月收款汇总" },
-    { "date": "2026-09-12", "direction": "收入", "amount": 3200, "category": "销售", "counterparty": "某公司团餐", "has_invoice": true, "source": "拍照识别" },
-    { "date": "2026-07-05", "direction": "支出", "amount": 24000, "category": "进货", "counterparty": "面粉肉菜批发", "has_invoice": false, "source": "手动填写" },
-    { "date": "2026-08-05", "direction": "支出", "amount": 23100, "category": "进货", "counterparty": "面粉肉菜批发", "has_invoice": false, "source": "手动填写" },
-    { "date": "2026-09-05", "direction": "支出", "amount": 26500, "category": "进货", "counterparty": "面粉肉菜批发", "has_invoice": true, "source": "拍照识别" },
-    { "date": "2026-07-01", "direction": "支出", "amount": 13500, "category": "房租", "note": "季度房租", "has_invoice": true, "source": "拍照识别" },
-    { "date": "2026-07-31", "direction": "支出", "amount": 9000, "category": "工资", "note": "2名帮工", "source": "手动填写" },
-    { "date": "2026-08-31", "direction": "支出", "amount": 9000, "category": "工资", "source": "手动填写" },
-    { "date": "2026-09-30", "direction": "支出", "amount": 9000, "category": "工资", "source": "手动填写" },
-    { "date": "2026-09-30", "direction": "支出", "amount": 4600, "category": "水电", "note": "7-9月水电燃气", "source": "手动填写" }
+    {
+      "date": "2026-07-31",
+      "direction": "收入",
+      "amount": 62000,
+      "category": "销售",
+      "has_invoice": false,
+      "source": "导入",
+      "note": "7月微信+支付宝收款汇总"
+    },
+    {
+      "date": "2026-08-31",
+      "direction": "收入",
+      "amount": 58500,
+      "category": "销售",
+      "has_invoice": false,
+      "source": "导入",
+      "note": "8月收款汇总"
+    },
+    {
+      "date": "2026-09-30",
+      "direction": "收入",
+      "amount": 66800,
+      "category": "销售",
+      "has_invoice": false,
+      "source": "导入",
+      "note": "9月收款汇总"
+    },
+    {
+      "date": "2026-09-12",
+      "direction": "收入",
+      "amount": 3200,
+      "category": "销售",
+      "counterparty": "某公司团餐",
+      "has_invoice": true,
+      "source": "拍照识别"
+    },
+    {
+      "date": "2026-07-05",
+      "direction": "支出",
+      "amount": 24000,
+      "category": "进货",
+      "counterparty": "面粉肉菜批发",
+      "has_invoice": false,
+      "source": "手动填写"
+    },
+    {
+      "date": "2026-08-05",
+      "direction": "支出",
+      "amount": 23100,
+      "category": "进货",
+      "counterparty": "面粉肉菜批发",
+      "has_invoice": false,
+      "source": "手动填写"
+    },
+    {
+      "date": "2026-09-05",
+      "direction": "支出",
+      "amount": 26500,
+      "category": "进货",
+      "counterparty": "面粉肉菜批发",
+      "has_invoice": true,
+      "source": "拍照识别"
+    },
+    {
+      "date": "2026-07-01",
+      "direction": "支出",
+      "amount": 13500,
+      "category": "房租",
+      "note": "季度房租",
+      "has_invoice": true,
+      "source": "拍照识别"
+    },
+    {
+      "date": "2026-07-31",
+      "direction": "支出",
+      "amount": 9000,
+      "category": "工资",
+      "note": "2名帮工",
+      "source": "手动填写"
+    },
+    {
+      "date": "2026-08-31",
+      "direction": "支出",
+      "amount": 9000,
+      "category": "工资",
+      "source": "手动填写"
+    },
+    {
+      "date": "2026-09-30",
+      "direction": "支出",
+      "amount": 9000,
+      "category": "工资",
+      "source": "手动填写"
+    },
+    {
+      "date": "2026-09-30",
+      "direction": "支出",
+      "amount": 4600,
+      "category": "水电",
+      "note": "7-9月水电燃气",
+      "source": "手动填写"
+    }
   ],
-  "taxes_paid": { "vat": 0, "surtaxes": 0, "income_tax": 0, "other": 0 },
+  "taxes_paid": {
+    "vat": 0,
+    "surtaxes": 0,
+    "income_tax": 0,
+    "other": 0
+  },
   "cash": {
     "cash_balance": 21000,
     "debts": 30000,

@@ -31,3 +31,19 @@ button.link { border: none; background: none; color: var(--brand); padding: 8px 
 .lv-正常 em { background: #e5f4ec; color: var(--ok); }
 textarea { width: 100%; font-size: 15px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; }
 .err { background: #fde8e6; color: var(--bad); padding: 10px; border-radius: 8px; margin-bottom: 12px; }
+.guide-btn { margin-top: 8px; color: var(--brand); border-color: var(--brand); }
+.progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+.progress div { height: 100%; background: var(--brand); transition: width .2s; }
+.step h2 { display: flex; align-items: center; gap: 8px; }
+.num { display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; font-size: 13px; align-items: center; justify-content: center; }
+.step p { font-size: 15px; line-height: 1.6; margin: 4px 0 8px; }
+.fields { width: 100%; border-collapse: collapse; font-size: 14px; margin: 4px 0; }
+.fields th { text-align: left; color: var(--muted); font-weight: normal; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.fields td { padding: 8px 4px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.fields td:first-child { white-space: nowrap; }
+.fields small, .dl small { display: block; color: var(--muted); font-size: 12px; }
+.fields .amt { text-align: right; font-weight: 600; white-space: nowrap; }
+.check { display: flex; gap: 8px; align-items: flex-start; background: #eef4ff; padding: 10px 12px; border-radius: 8px; font-size: 15px; }
+.check input { width: 18px; height: 18px; margin-top: 2px; }
+.done { background: #e5f4ec; color: var(--ok); }
+.dl { display: block; padding: 10px 0; border-top: 1px solid var(--line); color: var(--brand); text-decoration: none; font-size: 15px; }

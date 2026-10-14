@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { api } from './api'
 import sample from './sample.json'
-import type { BusinessData, Diagnosis } from './types'
+import { PolicyGuideView } from './PolicyGuide'
+import type { BusinessData, Diagnosis, PolicyGuide } from './types'
 
 type View = 'intake' | 'report' | 'ask'
 
@@ -20,6 +21,7 @@ export default function App() {
   const [report, setReport] = useState<Diagnosis | null>(null)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
+  const [guide, setGuide] = useState<PolicyGuide | null>(null)
 
   async function run<T>(fn: () => Promise<T>) {
     setBusy(true); setMsg('')
@@ -34,7 +36,7 @@ export default function App() {
       </header>
       <nav>
         {(['intake', 'report', 'ask'] as View[]).map(v => (
-          <button key={v} className={view === v ? 'on' : ''} onClick={() => setView(v)}>
+          <button key={v} className={view === v ? 'on' : ''} onClick={() => { setView(v); setGuide(null) }}>
             {{ intake: '录入', report: '体检报告', ask: '问政策' }[v]}
           </button>
         ))}
@@ -45,10 +47,15 @@ export default function App() {
           <Intake data={data} setData={setData} busy={busy} run={run}
             onDiagnose={async () => {
               const r = await run(() => api.diagnose(data))
-              if (r) { setReport(r); setView('report') }
+              if (r) { setReport(r); setGuide(null); setView('report') }
             }} />
         )}
-        {view === 'report' && <Report report={report} />}
+        {view === 'report' && (guide
+          ? <PolicyGuideView guide={guide} onBack={() => setGuide(null)} />
+          : <Report report={report} busy={busy} onGuide={async id => {
+              const g = await run(() => api.guide(id, data))
+              if (g) { setGuide(g); window.scrollTo(0, 0) }
+            }} />)}
         {view === 'ask' && <Ask run={run} busy={busy} />}
       </main>
     </div>
@@ -101,7 +108,7 @@ function Intake({ data, setData, busy, run, onDiagnose }: {
 
 const pct = new Set(['profit_margin', 'gross_margin', 'tax_burden', 'expense_no_invoice', 'debt_pressure'])
 
-function Report({ report }: { report: Diagnosis | null }) {
+function Report({ report, busy, onGuide }: { report: Diagnosis | null; busy: boolean; onGuide: (policyId: string) => void }) {
   if (!report) return <p className="hint">先在“录入”页填写信息并开始体检。</p>
   const matches = report.policy_matches.filter(m => m.status !== '不符合')
   return (
@@ -124,9 +131,10 @@ function Report({ report }: { report: Diagnosis | null }) {
         <h2>可能适用的优惠政策</h2>
         {matches.map(m => (
           <div key={m.policy.id} className="policy">
-            <div className="row"><b>{m.policy.title}</b><em>{m.status}</em></div>
+            <div className="row"><b>{m.policy.title}</b><em>{m.policy.region === '上海' ? '上海' : m.status}</em></div>
             <p>{m.reason}</p>
             <p className="src">依据：{m.policy.source_name}</p>
+            <button className="guide-btn" disabled={busy} onClick={() => onGuide(m.policy.id)}>怎么办理、怎么填 ›</button>
           </div>
         ))}
       </div>

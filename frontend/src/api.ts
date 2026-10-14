@@ -1,4 +1,4 @@
-import type { BusinessData, Diagnosis, Transaction } from './types'
+import type { BusinessData, Diagnosis, PolicyGuide, Transaction } from './types'
 
 async function post<T>(url: string, body: unknown): Promise<T> {
   const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
@@ -8,6 +8,7 @@ async function post<T>(url: string, body: unknown): Promise<T> {
 
 export const api = {
   diagnose: (d: BusinessData) => post<Diagnosis>('/api/diagnose', d),
+  guide: (policyId: string, d: BusinessData) => post<PolicyGuide>(`/api/policy/${policyId}/guide`, d),
   nextQuestion: (d: BusinessData) => post<{ next: { field: string; question: string } | null }>('/api/intake/next-question', d),
   ask: (question: string) => post<{ answer: string; sources: { title: string; source_name: string }[] }>('/api/policy/ask', { question }),
   async extract(file: File): Promise<{ transactions: Transaction[]; llm: boolean }> {

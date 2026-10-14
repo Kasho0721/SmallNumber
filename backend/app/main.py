@@ -1,10 +1,10 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from . import llm
-from .modules import diagnosis, intake, policy
-from .schemas import BusinessData, Diagnosis
+from .modules import diagnosis, guide, intake, policy
+from .schemas import BusinessData, Diagnosis, PolicyGuide
 
 app = FastAPI(title="小企有数 API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -40,6 +40,14 @@ class Question(BaseModel):
 @app.post("/api/policy/ask")
 def policy_ask(q: Question):
     return policy.ask(q.question)
+
+
+@app.post("/api/policy/{policy_id}/guide", response_model=PolicyGuide)
+def policy_guide(policy_id: str, data: BusinessData):
+    g = guide.build_guide(policy_id, data)
+    if g is None:
+        raise HTTPException(404, "这条政策还没有引导步骤")
+    return g
 
 
 # ----- B：诊断（串起全流程） -----

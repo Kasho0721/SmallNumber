@@ -8,11 +8,6 @@ from .. import llm
 from ..schemas import BusinessData, Diagnosis, Indicator, PolicyMatch
 
 
-def _months(data: BusinessData) -> float:
-    days = (data.period.end - data.period.start).days + 1
-    return max(days / 30.4, 1)
-
-
 def compute_indicators(data: BusinessData) -> list[Indicator]:
     inc = [t for t in data.transactions if t.direction == "收入"]
     exp = [t for t in data.transactions if t.direction == "支出"]
@@ -21,7 +16,7 @@ def compute_indicators(data: BusinessData) -> list[Indicator]:
     purchase = sum(t.amount for t in exp if t.category == "进货")
     taxes = data.taxes_paid
     tax_total = taxes.vat + taxes.surtaxes + taxes.income_tax + taxes.other
-    months = _months(data)
+    months = data.period.months
     monthly_rev = revenue / months
     monthly_exp = expense / months
 

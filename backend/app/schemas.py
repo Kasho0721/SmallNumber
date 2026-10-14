@@ -30,6 +30,11 @@ class Period(BaseModel):
     start: date
     end: date
 
+    @property
+    def months(self) -> int:
+        """按自然月计算的期间长度，至少 1 个月。"""
+        return max((self.end.year - self.start.year) * 12 + self.end.month - self.start.month + 1, 1)
+
 
 class Transaction(BaseModel):
     date: date
@@ -75,6 +80,7 @@ class Policy(BaseModel):
     title: str
     summary: str = Field(..., description="一两句话的通俗说明")
     tax_type: str = Field(..., description="增值税 / 个人所得税 / 企业所得税 / 六税两费 / 其他")
+    region: str = Field("全国", description="全国，或省市名如 上海")
     conditions: str = Field(..., description="适用条件原文或摘录")
     source_name: str = Field(..., description="文件名称和文号")
     source_url: Optional[str] = None
@@ -109,4 +115,39 @@ class Diagnosis(BaseModel):
     disclaimer: str = (
         "本结果基于您填写的信息自动生成，仅用于了解经营和财税状况，"
         "不构成税务或财务建议。具体办理请以税务机关解释为准，或咨询专业人员。"
+    )
+
+
+# ---------- 4. 政策引导填写（引导模块产出） ----------
+
+class FillField(BaseModel):
+    form: str = Field(..., description="表名，如 增值税及附加税费申报表（小规模纳税人适用）")
+    line: str = Field(..., description="栏次，如 第11栏")
+    label: str
+    value: Optional[float] = Field(None, description="按用户数据估算的金额，元；None 表示需用户自己确认")
+    note: str = ""
+
+
+class GuideStep(BaseModel):
+    title: str
+    detail: str
+    check: Optional[str] = Field(None, description="需要用户确认的问题，勾选后进入下一步")
+    fields: list[FillField] = []
+
+
+class Download(BaseModel):
+    name: str
+    url: str
+    note: str = ""
+
+
+class PolicyGuide(BaseModel):
+    policy_id: str
+    title: str
+    where: str = Field(..., description="在哪里办理")
+    steps: list[GuideStep]
+    downloads: list[Download] = []
+    caution: str = (
+        "以上金额是按您填写的数据估算的，只用于对照理解申报表。"
+        "实际申报时电子税务局会预填大部分数据，请以系统和税务机关的结果为准。"
     )

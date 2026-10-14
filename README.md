@@ -30,7 +30,9 @@ backend/app/
   modules/intake.py     A：拍照识别 + 对话追问
   modules/diagnosis.py  B：指标计算 + LLM 解读
   modules/policy.py     C：政策库、匹配、问答（RAG）
-  data/policies.json    C：政策库（目前 5 条种子政策）
+  modules/guide.py      政策引导填写：办理步骤 + 申报表各栏参考金额 + 上海税务局文件链接
+  data/policies.json    C：政策库（6 条，已按 2026 年增值税法更新，含上海城建税）
+  data/sources/         政策原文摘录（上海市税务局等官网，注明出处）
 frontend/src/
   types.ts            与 schemas.py 对应的前端类型
   App.tsx             录入 / 体检报告 / 问政策 三个页面
@@ -73,5 +75,5 @@ samples/              真实或示例账单数据（JSON）
 
 ## 注意
 
-种子政策（`data/policies.json`）按 2023 年第 12 号、第 19 号公告整理，有效期至 2027-12-31。
-2026 年起《增值税法》施行，C 需要核实这些条目在 2026 年是否仍然适用，并补充最新文件。
+- 增值税两条已按 2026 年《增值税法》和财政部 税务总局公告2026年第10号更新；其余按 2023 年第 12 号公告，有效期至 2027-12-31。
+- 引导填写里的金额都是估算，用来对照理解申报表，页面上已注明以电子税务局预填为准。

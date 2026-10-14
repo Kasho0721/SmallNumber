@@ -75,7 +75,7 @@ export function Report({ report, busy, onGuide, onStart }: {
 
       {report.risks.length > 0 && (
         <div className="card">
-          <h2><span className="card-icon" style={{ background: 'var(--warn-soft)', color: 'var(--warn)' }}><IconAlert /></span>值得留意</h2>
+          <h2><span className="card-icon" style={{ color: 'var(--warn)' }}><IconAlert /></span>值得留意</h2>
           {report.risks.map((r, k) => <div key={k} className="risk"><IconAlert /><span>{r}</span></div>)}
         </div>
       )}

@@ -18,7 +18,7 @@ npm install
 npm run dev                   # 手机和电脑连同一个 Wi-Fi，用终端里的 Network 地址打开
 ```
 
-打开后点“载入示例数据”→“开始体检”，就能看到完整报告。接口文档：http://localhost:8000/docs
+打开后点“没有照片？先看示例”→“开始体检”，就能看到完整报告。接口文档：http://localhost:8000/docs
 
 ## 目录
 

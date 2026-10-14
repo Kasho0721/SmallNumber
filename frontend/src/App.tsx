@@ -3,7 +3,7 @@ import { api } from './api'
 import sample from './sample.json'
 import { PolicyGuideView } from './PolicyGuide'
 import { Report } from './Report'
-import { IconAlert, IconBook, IconCamera, IconChat, IconList, IconPulse, IconSpark } from './icons'
+import { IconAlert, IconBook, IconCamera, IconChat, IconHelp, IconList, IconPulse } from './icons'
 import type { BusinessData, Diagnosis, PolicyGuide } from './types'
 
 type View = 'intake' | 'report' | 'ask'
@@ -103,7 +103,7 @@ function Intake({ data, setData, busy, withLabel, onDiagnose }: {
   return (
     <section>
       <h2 className="page-title">记一记这段时间的账</h2>
-      <p className="page-sub">拍几张照片就行，剩下的交给我们。</p>
+      <p className="page-sub">拍好后会自动识别成一笔笔账。</p>
 
       <div className="card">
         <h2><span className="card-icon"><IconCamera /></span>拍照记账</h2>
@@ -143,7 +143,7 @@ function Intake({ data, setData, busy, withLabel, onDiagnose }: {
         <button className="btn btn-soft" disabled={busy} onClick={async () => {
           const r = await withLabel('看看还缺什么…')(() => api.nextQuestion(data))
           setQuestion(r?.next ? r.next.question : '信息已经齐了，可以开始体检。')
-        }}><IconSpark />还缺什么信息？</button>
+        }}><IconHelp />还缺什么信息？</button>
         {question && (
           <div className="bubble-row">
             <div className="avatar">数</div>

@@ -16,7 +16,7 @@
   --warn: #c27a0e; --warn-soft: #fcf1dc;
   --bad: #c9442f;  --bad-soft: #fbe7e2;
   --gray-soft: #efebe4;
-  --radius: 18px;
+  --radius: 14px;          /* 卡片级圆角；卡内元素统一 10px */
   --shadow: 0 1px 2px rgba(60, 45, 20, .05), 0 4px 16px rgba(60, 45, 20, .06);
   --tabbar: 68px;
   font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -41,9 +41,9 @@ h1, h2, h3, p { margin: 0; }
 /* 顶部 */
 .topbar { display: flex; align-items: center; gap: 12px; padding: 20px 0 16px; }
 .logo {
-  width: 44px; height: 44px; border-radius: 14px; flex: none;
+  width: 44px; height: 44px; border-radius: 10px; flex: none;
   background: var(--brand); color: #fff; display: grid; place-items: center;
-  font-weight: 700; font-size: 20px; box-shadow: 0 4px 12px rgba(15, 138, 122, .3);
+  font-weight: 700; font-size: 20px;
 }
 .topbar h1 { font-size: 22px; line-height: 1.2; letter-spacing: .5px; }
 .topbar p { font-size: 14px; color: var(--muted); }
@@ -57,11 +57,8 @@ h1, h2, h3, p { margin: 0; }
   margin-bottom: 14px; box-shadow: var(--shadow);
 }
 .card h2 { font-size: 19px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-.card-icon {
-  width: 36px; height: 36px; border-radius: 11px; flex: none;
-  display: grid; place-items: center; background: var(--brand-soft); color: var(--brand);
-}
-.card-icon svg { width: 20px; height: 20px; }
+.card-icon { display: flex; flex: none; color: var(--brand); }
+.card-icon svg { width: 24px; height: 24px; }
 .hint { color: var(--muted); font-size: 15px; }
 .src { color: var(--muted); font-size: 14px; margin-top: 8px; }
 .disclaimer { color: var(--muted); font-size: 13px; line-height: 1.6; padding: 4px 4px 0; }
@@ -69,10 +66,10 @@ h1, h2, h3, p { margin: 0; }
 /* 按钮 */
 .btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 52px; padding: 12px 20px; border-radius: 14px; border: none;
+  min-height: 52px; padding: 12px 20px; border-radius: 10px; border: none;
   font-size: 18px; font-weight: 600; width: 100%;
 }
-.btn-primary { background: var(--brand); color: #fff; box-shadow: 0 6px 16px rgba(15, 138, 122, .28); }
+.btn-primary { background: var(--brand); color: #fff; }
 .btn-primary:active:not(:disabled) { background: var(--brand-deep); }
 .btn-soft { background: var(--brand-soft); color: var(--brand-deep); }
 .btn-ghost { background: transparent; color: var(--brand); border: 1.5px solid var(--line); }
@@ -85,7 +82,7 @@ h1, h2, h3, p { margin: 0; }
 /* 拍照区域 */
 .upload {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  border: 2px dashed #bfe0d8; background: var(--brand-soft); border-radius: 16px;
+  border: 2px dashed #bfe0d8; background: var(--brand-soft); border-radius: 10px;
   padding: 26px 16px; color: var(--brand-deep); text-align: center; cursor: pointer;
   margin: 12px 0;
 }
@@ -97,7 +94,7 @@ h1, h2, h3, p { margin: 0; }
 
 /* 统计 */
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 14px; }
-.stat { background: var(--bg); border-radius: 14px; padding: 12px 8px; text-align: center; }
+.stat { background: var(--bg); border-radius: 10px; padding: 12px 8px; text-align: center; }
 .stat b { display: block; font-size: 20px; line-height: 1.3; font-variant-numeric: tabular-nums; }
 .stat span { font-size: 13px; color: var(--muted); }
 .stat.in b { color: var(--brand-deep); }
@@ -124,15 +121,14 @@ h1, h2, h3, p { margin: 0; }
   color: #fff; display: grid; place-items: center; font-size: 15px; font-weight: 700;
 }
 .bubble {
-  background: var(--brand-soft); padding: 12px 14px; border-radius: 4px 16px 16px 16px;
+  background: var(--brand-soft); padding: 12px 14px; border-radius: 4px 10px 10px 10px;
   font-size: 17px; flex: 1;
 }
 
 /* 体检仪表盘 */
 .dash {
-  background: linear-gradient(160deg, #13998a 0%, #0a6b5f 100%); color: #fff;
-  border-radius: 22px; padding: 22px 20px; margin-bottom: 14px;
-  box-shadow: 0 10px 28px rgba(10, 107, 95, .3);
+  background: var(--brand-deep); color: #fff;
+  border-radius: var(--radius); padding: 22px 20px; margin-bottom: 14px;
 }
 .dash-top { display: flex; align-items: center; gap: 18px; }
 .ring { position: relative; width: 120px; height: 120px; flex: none; }
@@ -152,7 +148,7 @@ h1, h2, h3, p { margin: 0; }
 /* 指标卡 */
 .inds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .ind {
-  background: var(--card); border-radius: 16px; padding: 14px; box-shadow: var(--shadow);
+  background: var(--card); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
   border-top: 4px solid var(--line); text-align: left; border-left: none; border-right: none; border-bottom: none;
   display: flex; flex-direction: column; gap: 4px; min-height: 120px;
 }
@@ -182,20 +178,20 @@ h1, h2, h3, p { margin: 0; }
 
 /* 空状态 */
 .empty { text-align: center; padding: 48px 20px; }
-.empty-icon { width: 76px; height: 76px; margin: 0 auto 16px; border-radius: 24px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; }
-.empty-icon svg { width: 40px; height: 40px; }
+.empty-icon { margin-bottom: 12px; color: var(--brand); }
+.empty-icon svg { width: 48px; height: 48px; }
 .empty h2 { font-size: 20px; margin-bottom: 8px; }
 .empty p { color: var(--muted); margin-bottom: 20px; }
 
 /* 问政策 */
 textarea {
-  width: 100%; font-size: 17px; padding: 14px; border: 1.5px solid var(--line); border-radius: 14px;
+  width: 100%; font-size: 17px; padding: 14px; border: 1.5px solid var(--line); border-radius: 10px;
   background: var(--bg); margin-bottom: 12px; resize: vertical; line-height: 1.6;
 }
 textarea:focus { outline: none; border-color: var(--brand); background: #fff; }
 .suggests { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .suggests button {
-  border: 1.5px solid var(--line); background: var(--card); border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--card); border-radius: 10px;
   padding: 8px 14px; font-size: 15px; color: var(--text); min-height: 40px; text-align: left;
 }
 .answer { white-space: pre-wrap; font-size: 17px; line-height: 1.75; }
@@ -226,7 +222,7 @@ textarea:focus { outline: none; border-color: var(--brand); background: #fff; }
 .fields .amt.pre { font-weight: 400; color: var(--muted); font-size: 14px; }
 .check {
   display: flex; gap: 12px; align-items: center; background: var(--accent-soft); padding: 14px;
-  border-radius: 14px; font-size: 16px; margin-top: 14px; cursor: pointer; min-height: 52px;
+  border-radius: 10px; font-size: 16px; margin-top: 14px; cursor: pointer; min-height: 52px;
 }
 .check input { width: 24px; height: 24px; flex: none; accent-color: var(--brand); }
 .check.done { background: var(--ok-soft); color: var(--ok); }
@@ -243,7 +239,7 @@ textarea:focus { outline: none; border-color: var(--brand); background: #fff; }
 /* 底部导航 */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-  background: rgba(255, 253, 249, .96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  background: var(--card);
   border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom);
 }
 .tabbar-inner { max-width: 480px; margin: 0 auto; display: flex; height: var(--tabbar); }
@@ -256,12 +252,12 @@ textarea:focus { outline: none; border-color: var(--brand); background: #fff; }
 .tabbar .dot { position: absolute; top: 10px; left: calc(50% + 10px); width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
 
 /* 提示和加载 */
-.err { display: flex; gap: 8px; background: var(--bad-soft); color: var(--bad); padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; font-size: 15px; }
+.err { display: flex; gap: 8px; background: var(--bad-soft); color: var(--bad); padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 15px; }
 .loading {
-  position: fixed; inset: 0; z-index: 20; background: rgba(247, 243, 236, .75);
-  display: grid; place-items: center; backdrop-filter: blur(2px);
+  position: fixed; inset: 0; z-index: 20; background: rgba(247, 243, 236, .85);
+  display: grid; place-items: center;
 }
-.loading-box { background: var(--card); border-radius: 20px; padding: 24px 32px; box-shadow: var(--shadow); text-align: center; font-size: 17px; }
+.loading-box { background: var(--card); border-radius: var(--radius); padding: 24px 32px; box-shadow: var(--shadow); text-align: center; font-size: 17px; }
 .spinner { width: 40px; height: 40px; margin: 0 auto 12px; border-radius: 50%; border: 4px solid var(--brand-soft); border-top-color: var(--brand); animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 

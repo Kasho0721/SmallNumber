@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { api } from './api'
-import { Ask } from './Ask'
+import { Ask } from './AskPage'
 import { Confirm, Home } from './Home'
 import type { Scan } from './Home'
 import { IconAlert, IconBook, IconChat, IconPulse } from './icons'

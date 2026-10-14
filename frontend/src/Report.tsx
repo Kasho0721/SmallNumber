@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { formatValue, indicatorQuestion, policyQuestion, reportQuestions, riskQuestion } from './ask'
-import { IconAlertCircle, IconArrow, IconChat, IconPulse, IconSquare, IconSquareCheck } from './icons'
+import { formatValue, indicatorQuestion, riskQuestion } from './ask'
+import { IconAlertCircle, IconArrow, IconPulse } from './icons'
 import type { Diagnosis, Indicator } from './types'
 
 const chipClass: Record<Indicator['level'], string> = { 正常: 'ok', 关注: 'warn', 预警: 'bad', 数据不足: '' }
@@ -50,7 +50,6 @@ export function Report({ report, period, busy, onStart, onAsk, onPolicy }: {
   onAsk: (question: string, policyId?: string) => void; onPolicy: (policyId: string) => void
 }) {
   const [open, setOpen] = useState<string | null>(null)
-  const [done, setDone] = useState<Set<number>>(new Set())
 
   if (!report) return (
     <div className="empty">
@@ -64,7 +63,6 @@ export function Report({ report, period, busy, onStart, onAsk, onPolicy }: {
   const matches = report.policy_matches.filter(m => m.status !== '不符合')
   const score = healthScore(report.indicators)
   const count = (lv: Indicator['level']) => report.indicators.filter(i => i.level === lv).length
-  const [riskTitle, riskText] = report.risks.length ? splitRisk(report.risks[0]) : ['', '']
 
   return (
     <section>
@@ -73,44 +71,28 @@ export function Report({ report, period, busy, onStart, onAsk, onPolicy }: {
 
       <div className="card dash">
         <Ring score={score} />
-        <p className="dash-summary">{report.summary}</p>
         <div className="dash-counts">
           <span className="chip ok">良好 {count('正常')}</span>
           <span className="chip warn">留意 {count('关注')}</span>
           <span className="chip bad">需关注 {count('预警')}</span>
         </div>
-        <p className="dash-note">健康分按各项指标的红黄绿等级折算，仅供参考。</p>
       </div>
 
-      {report.risks.length > 0 && <>
-        <div className="alert">
-          <IconAlertCircle />
-          <div>
-            <h2>{riskTitle}</h2>
-            {riskText && <p>{riskText}</p>}
+      {report.risks.map((r, k) => {
+        const [title, text] = splitRisk(r)
+        return (
+          <div key={k} className="alert">
+            <IconAlertCircle />
+            <div>
+              <h2>{title}</h2>
+              {text && <p>{text}</p>}
+              <AskLink disabled={busy} onClick={() => onAsk(riskQuestion(r))}>问问怎么办</AskLink>
+            </div>
           </div>
-        </div>
-        <h3 className="section-title">待办事项<small>{report.risks.length - done.size} 项没做</small></h3>
-        <div className="card list">
-          {report.risks.map((r, k) => {
-            const on = done.has(k)
-            return (
-              <div key={k} className={`todo${on ? ' done' : ''}`}>
-                <button className="todo-box" aria-label={on ? '标为没做' : '标为做完'}
-                  onClick={() => setDone(s => { const n = new Set(s); if (on) n.delete(k); else n.add(k); return n })}>
-                  {on ? <IconSquareCheck /> : <IconSquare />}
-                </button>
-                <div>
-                  <span>{splitRisk(r).join('：')}</span>
-                  <AskLink disabled={busy} onClick={() => onAsk(riskQuestion(r))}>和交税有关吗？问问</AskLink>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </>}
+        )
+      })}
 
-      <h3 className="section-title">各项指标<small>点一下看说明</small></h3>
+      <h3 className="section-title">各项指标<small>点开看说明</small></h3>
       <div className="inds">
         {report.indicators.map(i => {
           const [v, unit] = formatValue(i)
@@ -126,47 +108,26 @@ export function Report({ report, period, busy, onStart, onAsk, onPolicy }: {
                 <span className={`chip ${chipClass[i.level]}`}>{levelLabel[i.level]}</span>
               </div>
               <span className={`ind-val${(v + unit).length > 7 ? ' long' : ''}`}>{v}{unit && <small>{unit}</small>}</span>
-              <span className="ind-exp">{i.explanation}</span>
-              {q && <AskLink disabled={busy} onClick={() => onAsk(q)} />}
+              {isOpen && <span className="ind-exp">{i.explanation}</span>}
+              {isOpen && q && <AskLink disabled={busy} onClick={() => onAsk(q)} />}
             </div>
           )
         })}
       </div>
 
-      <h3 className="section-title">可能用得上的优惠<small>{matches.length} 项</small></h3>
-      <div className="card list">
-        {matches.length === 0 && <p className="hint">暂时没有匹配到优惠政策。</p>}
-        {matches.map(m => (
-          <div key={m.policy.id} className="policy">
-            <button className="policy-main" onClick={() => onPolicy(m.policy.id)}>
-              <div className="policy-head">
-                <b>{m.policy.title}</b>
-                <span className="chip ok">{m.status === '符合' ? '你可能适用' : '可能适用'}</span>
-              </div>
-              <p>{m.reason}</p>
-              <span className="src">{m.policy.source_name}</span>
+      {matches.length > 0 && <>
+        <h3 className="section-title">可能用得上的优惠</h3>
+        <div className="card list">
+          {matches.map(m => (
+            <button key={m.policy.id} className="row-link" onClick={() => onPolicy(m.policy.id)}>
+              <b>{m.policy.title}</b>
+              <IconArrow />
             </button>
-            <div className="policy-actions">
-              <button className="btn btn-soft" onClick={() => onPolicy(m.policy.id)}>看详情<IconArrow /></button>
-              <button className="btn btn-ghost" disabled={busy} onClick={() => onAsk(policyQuestion(m.policy.title), m.policy.id)}>
-                <IconChat />问问这条
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="card">
-        <h2><span className="card-icon"><IconChat /></span>对报告有疑问？</h2>
-        <p className="hint">回答会结合你这份体检的数据，并标出依据的文件。</p>
-        <div className="suggests" style={{ marginTop: 12, marginBottom: 0 }}>
-          {reportQuestions(report).map(s => (
-            <button key={s.q} disabled={busy} onClick={() => onAsk(s.q, s.policyId)}>{s.q}</button>
           ))}
         </div>
-      </div>
+      </>}
 
-      <p className="disclaimer">{report.disclaimer}</p>
+      <p className="disclaimer center">仅供参考，以税务机关官方解释为准</p>
     </section>
   )
 }

@@ -72,7 +72,7 @@ export function Home({ data, industry, busy, onScan, onSample, onDiagnose, onSet
       )}
 
       {recent.length > 0 && <>
-        <h3 className="section-title">最近记账<small>共 {txs.length} 笔</small></h3>
+        <h3 className="section-title">最近记账</h3>
         <div className="card list">
           {recent.map((t, k) => (
             <div key={k} className="tx">

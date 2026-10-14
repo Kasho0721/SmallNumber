@@ -3,6 +3,16 @@ import { reportQuestions } from './ask'
 import { IconArrow, IconBot, IconFile, IconSend } from './icons'
 import type { AskTurn, BusinessData, Diagnosis } from './types'
 
+// 回答较长时先显示前几行，点“展开”看全文
+function Answer({ text }: { text: string }) {
+  const [full, setFull] = useState(false)
+  const long = text.length > 90
+  return <>
+    <p className={`answer${long && !full ? ' clamp' : ''}`}>{text}</p>
+    {long && <button className="link-btn" onClick={() => setFull(!full)}>{full ? '收起' : '展开全文'}</button>}
+  </>
+}
+
 export function Ask({ data, report, turns, busy, useShop, setUseShop, onAsk, onPolicy, onGoReport }: {
   data: BusinessData; report: Diagnosis | null; turns: AskTurn[]; busy: boolean
   useShop: boolean; setUseShop: (v: boolean) => void
@@ -24,28 +34,27 @@ export function Ask({ data, report, turns, busy, useShop, setUseShop, onAsk, onP
       {report ? (
         <div className={`ctx${useShop ? '' : ' off'}`}>
           <span className="bot"><IconBot /></span>
-          <div>
-            <b>{useShop ? `已结合「${data.profile.name ?? '你的店'}」的体检数据` : '现在只按政策原文回答'}</b>
-            <label className="toggle">
-              <input type="checkbox" checked={useShop} onChange={e => setUseShop(e.target.checked)} />
-              回答时结合我的数据
-            </label>
-          </div>
+          <label className="toggle">
+            <input type="checkbox" checked={useShop} onChange={e => setUseShop(e.target.checked)} />
+            结合「{data.profile.name ?? '我的店'}」的体检数据
+          </label>
         </div>
       ) : (
         <div className="ctx off">
           <span className="bot"><IconBot /></span>
           <div>
-            <b>先做一次体检，回答就能结合你店里的情况</b>
-            <button className="ask-link" onClick={onGoReport}>去记账体检<IconArrow /></button>
+            <b>先体检，回答更贴近你的店</b>
+            <button className="ask-link" onClick={onGoReport}>去记账<IconArrow /></button>
           </div>
         </div>
       )}
 
+      <p className="fine center">仅供参考，以税务机关官方解释为准</p>
+
       {turns.length === 0 && (
         <div className="msg bot-msg">
           <span className="bot"><IconBot /></span>
-          <p className="a-bubble">用大白话问就行，比如“客户要我开发票，我能开吗？”。回答会标出依据的文件。</p>
+          <p className="a-bubble">用大白话问就行。</p>
         </div>
       )}
 
@@ -55,19 +64,12 @@ export function Ask({ data, report, turns, busy, useShop, setUseShop, onAsk, onP
           <div className="msg bot-msg">
             <span className="bot"><IconBot /></span>
             <div className="a-bubble">
-              <p className="answer">{t.result.answer}</p>
-              {t.withShop && t.result.shop_facts.length > 0 && (
-                <div className="ctx-chips">
-                  <span>结合了：</span>
-                  {t.result.shop_facts.map(f => <span key={f} className="chip">{f}</span>)}
-                </div>
-              )}
-              {t.result.sources.map(s => (
+              <Answer text={t.result.answer} />
+              {t.result.sources.slice(0, 2).map(s => (
                 <button key={s.id} className="cite" onClick={() => onPolicy(s.id)}>
                   <IconFile /><span>{s.source_name}</span><IconArrow />
                 </button>
               ))}
-              <p className="fine">仅供参考，以税务机关官方解释为准</p>
             </div>
           </div>
         </div>

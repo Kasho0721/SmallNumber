@@ -28,7 +28,7 @@ export const api = {
   async extract(file: File): Promise<{ transactions: Transaction[]; llm: boolean }> {
     const fd = new FormData()
     fd.append('file', file)
-    const r = await fetch('/api/intake/extract', { method: 'POST', body: fd, headers: modelHeaders(true) })
+    const r = await fetch('/api/intake/extract', { method: 'POST', body: fd, headers: modelHeaders() })
     if (!r.ok) throw new Error(`extract ${r.status}`)
     return r.json()
   },

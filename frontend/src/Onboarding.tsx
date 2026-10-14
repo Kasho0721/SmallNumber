@@ -21,8 +21,7 @@ export function Onboarding({ initial, onDone, onCancel }: {
   const [test, setTest] = useState<{ state: 'idle' | 'busy' | 'ok' | 'fail'; msg?: string }>({ state: 'idle' })
 
   const chosenIndustry = industry === 'custom' ? custom.trim() : industry
-  const needsKey = model.id !== 'default'
-  const modelReady = !needsKey || (!!model.apiKey?.trim() && (model.id !== 'custom' || (!!model.baseUrl?.trim() && !!model.model?.trim())))
+  const modelReady = model.id === 'default' || (!!model.apiKey?.trim() && !!model.baseUrl?.trim() && !!model.model?.trim())
 
   function pick(m: ModelChoice) { setModel(m); setTest({ state: 'idle' }) }
 
@@ -41,7 +40,6 @@ export function Onboarding({ initial, onDone, onCancel }: {
         <span className="onb-step">1 / 2</span>
       </div>
       <h1 className="onb-title">你做的是什么生意？</h1>
-      <p className="page-sub">选一个，体检会按你的行业来看。</p>
       <div className="biz-grid">
         {PRESET_INDUSTRIES.map((name, k) => {
           const Icon = industryIcon[k]
@@ -55,13 +53,11 @@ export function Onboarding({ initial, onDone, onCancel }: {
       <div className={`biz-custom${industry === 'custom' ? ' on' : ''}`}>
         <button className="biz biz-add" onClick={() => setIndustry('custom')}><IconPlus /><span>自定义</span></button>
         <label className="field">
-          <input value={custom} placeholder="输入你的行业" onFocus={() => setIndustry('custom')}
+          <input value={custom} placeholder="如：宠物美容" onFocus={() => setIndustry('custom')}
             onChange={e => setCustom(e.target.value)} />
-          <small>比如：宠物美容、打印店</small>
         </label>
       </div>
       <button className="btn btn-primary" disabled={!chosenIndustry} onClick={() => setStep(2)}>下一步</button>
-      <p className="onb-note">以后可以在设置里改</p>
     </section>
   )
 
@@ -71,26 +67,23 @@ export function Onboarding({ initial, onDone, onCancel }: {
         <button className="back" onClick={() => setStep(1)}><IconBack />上一步</button>
         <span className="onb-step">2 / 2</span>
       </div>
-      <h1 className="onb-title">选一个帮你分析的 AI</h1>
-      <p className="page-sub">不同的模型，回答风格略有不同。</p>
+      <h1 className="onb-title">用哪个 AI？</h1>
       <div className="models">
         {MODELS.map(m => {
           const on = model.id === m.id
           return (
             <div key={m.id} className={`model${on ? ' on' : ''}`}>
-              <button className="model-head" onClick={() => pick(on ? model : { id: m.id, baseUrl: model.baseUrl, model: model.model, apiKey: model.apiKey })}>
+              <button className="model-head" onClick={() => pick({ ...model, id: m.id })}>
                 <span className="model-text"><b>{m.name}</b><small>{m.desc}</small></span>
                 <span className={`radio${on ? ' on' : ''}`}>{on && <IconTick />}</span>
               </button>
               {on && m.id !== 'default' && (
                 <div className="model-form">
-                  {m.id === 'custom' && <>
-                    <label className="field-row"><span>接口地址</span>
-                      <input value={model.baseUrl ?? ''} placeholder="https://api.example.com/v1" inputMode="url"
-                        onChange={e => pick({ ...model, baseUrl: e.target.value })} /></label>
-                    <label className="field-row"><span>模型名</span>
-                      <input value={model.model ?? ''} placeholder="如 qwen-plus" onChange={e => pick({ ...model, model: e.target.value })} /></label>
-                  </>}
+                  <label className="field-row"><span>接口地址</span>
+                    <input value={model.baseUrl ?? ''} placeholder="https://…/v1" inputMode="url"
+                      onChange={e => pick({ ...model, baseUrl: e.target.value })} /></label>
+                  <label className="field-row"><span>模型名</span>
+                    <input value={model.model ?? ''} placeholder="如 qwen-plus" onChange={e => pick({ ...model, model: e.target.value })} /></label>
                   <label className="field-row"><span>API 密钥</span>
                     <input value={model.apiKey ?? ''} placeholder="sk-…" type="password" autoComplete="off"
                       onChange={e => pick({ ...model, apiKey: e.target.value })} /></label>
@@ -105,7 +98,7 @@ export function Onboarding({ initial, onDone, onCancel }: {
           )
         })}
       </div>
-      <div className="note-bar"><IconLock /><span>你的账目只用来生成体检报告；密钥只保存在这台手机的浏览器里。</span></div>
+      <p className="onb-note"><IconLock />密钥只存在这台手机上</p>
       <button className="btn btn-primary" disabled={!modelReady}
         onClick={() => onDone({ industry: chosenIndustry!, model })}>开始使用</button>
     </section>

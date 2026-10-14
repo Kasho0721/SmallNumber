@@ -1,8 +1,8 @@
 {
   "profile": {
-    "name": "张姐早餐店（示例）",
+    "name": "阿陈理发（示例）",
     "entity_type": "个体工商户",
-    "industry": "餐饮",
+    "industry": "理发美容",
     "region": "上海市普陀区",
     "taxpayer_type": "小规模纳税人",
     "collection_method": "查账征收",
@@ -46,7 +46,7 @@
       "direction": "收入",
       "amount": 3200,
       "category": "销售",
-      "counterparty": "某公司团餐",
+      "counterparty": "某公司员工福利卡",
       "has_invoice": true,
       "source": "拍照识别"
     },
@@ -55,7 +55,7 @@
       "direction": "支出",
       "amount": 24000,
       "category": "进货",
-      "counterparty": "面粉肉菜批发",
+      "counterparty": "美发用品批发",
       "has_invoice": false,
       "source": "手动填写"
     },
@@ -64,7 +64,7 @@
       "direction": "支出",
       "amount": 23100,
       "category": "进货",
-      "counterparty": "面粉肉菜批发",
+      "counterparty": "美发用品批发",
       "has_invoice": false,
       "source": "手动填写"
     },
@@ -73,7 +73,7 @@
       "direction": "支出",
       "amount": 26500,
       "category": "进货",
-      "counterparty": "面粉肉菜批发",
+      "counterparty": "美发用品批发",
       "has_invoice": true,
       "source": "拍照识别"
     },

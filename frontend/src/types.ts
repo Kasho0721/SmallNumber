@@ -74,6 +74,12 @@ export interface PolicyGuide {
   caution: string
 }
 
+export interface PolicyDetail {
+  id: string; title: string; summary: string; tax_type: string; region: string; conditions: string
+  source_name: string; source_url?: string | null; effective_from?: string | null; effective_to?: string | null
+  has_guide: boolean
+}
+
 export interface AskSource { id: string; title: string; source_name: string; source_url?: string | null; has_guide: boolean }
 // shop_facts：后端回答时实际用到的这家店的数据要点，页面上展示“结合了什么”
 export interface AskResult { answer: string; sources: AskSource[]; shop_facts: string[] }

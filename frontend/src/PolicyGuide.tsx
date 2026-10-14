@@ -1,71 +1,116 @@
-import { useState } from 'react'
-import { IconBack, IconCheck, IconDownload, IconPin } from './icons'
-import type { PolicyGuide } from './types'
+import { useEffect, useState } from 'react'
+import { api } from './api'
+import { IconAlert, IconBack, IconCheck, IconDownload, IconExternal, IconLandmark, IconPhone } from './icons'
+import type { PolicyDetail, PolicyGuide, PolicyMatch } from './types'
 
-const money = (v: number) => v.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+// 只给办理指引和官方入口：不在应用里填申报数字，也不生成申报表
+const TAX_SITE = { name: '国家税务总局上海市税务局', note: '从官网首页进入电子税务局办理', url: 'https://shanghai.chinatax.gov.cn/' }
+const CAUTION = '本页只提供办理指引，不代你填写或提交申报，也不构成税务建议。具体以电子税务局和税务机关的要求为准。'
+
+function Back({ onBack, label }: { onBack: () => void; label: string }) {
+  return <button className="back" onClick={onBack}><IconBack />{label}</button>
+}
 
 export function PolicyGuideView({ guide, onBack, backLabel }: { guide: PolicyGuide; onBack: () => void; backLabel: string }) {
-  // 每一步有确认问题时，勾选后才展开下一步，引导老板一步步走完
   const [done, setDone] = useState<boolean[]>(guide.steps.map(() => false))
-  const firstOpen = done.findIndex((d, i) => !d && guide.steps[i].check)
-  const visible = firstOpen === -1 ? guide.steps.length : firstOpen + 1
-  const finished = firstOpen === -1
-  const shown = Math.min(visible, guide.steps.length)
 
   return (
     <section>
-      <button className="back" onClick={onBack}><IconBack />{backLabel}</button>
+      <Back onBack={onBack} label={backLabel} />
+      <h1 className="page-title">{guide.title}怎么办</h1>
+      <p className="page-sub">按下面几步，到电子税务局自己办理。</p>
+
       <div className="card">
-        <h2 style={{ fontSize: 21 }}>{guide.title}</h2>
-        <p className="where"><IconPin /><span>在哪办：{guide.where}</span></p>
-        <div className="progress"><div style={{ width: `${(shown / guide.steps.length) * 100}%` }} /></div>
-        <p className="progress-label">第 {shown} 步，共 {guide.steps.length} 步</p>
+        <ol className="timeline">
+          {guide.steps.map((s, i) => (
+            <li key={i} className={done[i] ? 'ok' : ''}>
+              <span className="num">{done[i] ? <IconCheck /> : i + 1}</span>
+              <div>
+                <h2>{s.title}</h2>
+                <p className="step-detail">{s.detail}</p>
+                {s.check && (
+                  <label className={`check${done[i] ? ' done' : ''}`}>
+                    <input type="checkbox" checked={done[i]}
+                      onChange={e => setDone(done.map((d, k) => (k === i ? e.target.checked : d)))} />
+                    {s.check}
+                  </label>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
 
-      <div className="steps">
-        {guide.steps.slice(0, visible).map((s, i) => (
-          <div key={i} className={`card step${done[i] ? ' ok' : ''}`}>
-            <span className="num">{done[i] ? '✓' : i + 1}</span>
-            <h2>{s.title}</h2>
-            <p className="step-detail">{s.detail}</p>
-            {s.fields.length > 0 && (
-              <table className="fields">
-                <thead><tr><th>栏次</th><th>填什么</th><th style={{ textAlign: 'right' }}>参考金额</th></tr></thead>
-                <tbody>
-                  {s.fields.map((f, j) => (
-                    <tr key={j}>
-                      <td>{f.line}</td>
-                      <td>{f.label}{f.note && <small>{f.note}</small>}</td>
-                      <td className={`amt${f.value == null ? ' pre' : ''}`}>{f.value == null ? '系统预填' : money(f.value)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-            {s.fields[0] && <p className="src">表：{[...new Set(s.fields.map(f => f.form))].join('；')}</p>}
-            {s.check && (
-              <label className={`check${done[i] ? ' done' : ''}`}>
-                <input type="checkbox" checked={done[i]}
-                  onChange={e => setDone(done.map((d, k) => (k === i ? e.target.checked : d)))} />
-                {s.check}
-              </label>
-            )}
+      <a className="card link-card" href={TAX_SITE.url} target="_blank" rel="noreferrer">
+        <IconLandmark />
+        <div><b>{TAX_SITE.name}</b><small>{TAX_SITE.note} · shanghai.chinatax.gov.cn</small></div>
+        <IconExternal />
+      </a>
+      <a className="tel" href="tel:12366"><IconPhone />有疑问可拨打 12366 纳税服务热线</a>
+
+      {guide.downloads.length > 0 && (
+        <div className="card">
+          <h2><span className="card-icon"><IconDownload /></span>官方文件</h2>
+          {guide.downloads.map(d => (
+            <a key={d.url} className="dl" href={d.url} target="_blank" rel="noreferrer">
+              <div>{d.name}{d.note && <small>{d.note}</small>}</div>
+              <IconExternal />
+            </a>
+          ))}
+        </div>
+      )}
+
+      <div className="note-bar warn"><IconAlert /><span>{CAUTION}</span></div>
+      <a className="btn btn-primary" href={TAX_SITE.url} target="_blank" rel="noreferrer">前往电子税务局<IconExternal /></a>
+      <p className="disclaimer center">仅供参考，以税务机关官方解释为准</p>
+    </section>
+  )
+}
+
+export function PolicyDetailView({ id, match, busy, backLabel, onBack, onGuide, onAsk }: {
+  id: string; match?: PolicyMatch; busy: boolean; backLabel: string
+  onBack: () => void; onGuide: (id: string) => void; onAsk: (q: string, policyId: string) => void
+}) {
+  const [p, setP] = useState<PolicyDetail | null>(null)
+  const [err, setErr] = useState('')
+  useEffect(() => { api.policy(id).then(setP).catch(e => setErr(String(e))) }, [id])
+
+  if (err) return <section><Back onBack={onBack} label={backLabel} /><p className="err">没找到这条政策：{err}</p></section>
+  if (!p) return <section><Back onBack={onBack} label={backLabel} /><p className="hint">正在打开…</p></section>
+
+  const fits = match && match.status !== '不符合'
+  return (
+    <section>
+      <Back onBack={onBack} label={backLabel} />
+      <h1 className="page-title">{p.title}</h1>
+      <p className="meta">
+        {p.source_url ? <a href={p.source_url} target="_blank" rel="noreferrer">{p.source_name}</a> : p.source_name}
+        {p.effective_from && <><br />有效期：{p.effective_from} 至 {p.effective_to ?? '今后'}</>}
+      </p>
+
+      {match && (
+        <div className={`verdict${fits ? '' : ' no'}`}>
+          {fits ? <IconCheck /> : <IconAlert />}
+          <div>
+            <b>{fits ? '你可能适用' : '按你现在的数据，可能不适用'}</b>
+            <p>{match.reason}</p>
+            {match.missing_info.length > 0 && <p>还需要确认：{match.missing_info.join('、')}</p>}
           </div>
-        ))}
-      </div>
-
-      {finished && <div className="card finish"><IconCheck />都完成了。下次申报期记得再来体检一次。</div>}
+        </div>
+      )}
 
       <div className="card">
-        <h2><span className="card-icon"><IconDownload /></span>相关文件下载</h2>
-        {guide.downloads.map(d => (
-          <a key={d.url} className="dl" href={d.url} target="_blank" rel="noreferrer">
-            <div>{d.name}{d.note && <small>{d.note}</small>}</div>
-            <IconDownload />
-          </a>
-        ))}
+        <h3 className="mini-title">说的是什么</h3>
+        <p>{p.summary}</p>
+        <h3 className="mini-title">适用条件</h3>
+        <p>{p.conditions}</p>
+        <h3 className="mini-title">税种和地区</h3>
+        <p>{p.tax_type} · {p.region}</p>
       </div>
-      <p className="disclaimer">{guide.caution}</p>
+
+      <p className="disclaimer center">仅供参考，以税务机关官方解释为准</p>
+      {p.has_guide && <button className="btn btn-primary" disabled={busy} onClick={() => onGuide(p.id)}>看看怎么办理</button>}
+      <button className="btn btn-ghost" disabled={busy} onClick={() => onAsk(`${p.title}，对我的店适用吗？要满足什么条件？`, p.id)}>问问这条政策</button>
     </section>
   )
 }
